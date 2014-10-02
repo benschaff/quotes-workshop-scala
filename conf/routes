@@ -1,0 +1,12 @@
+# Map static resources from the /public folder to the /assets URL path
+GET         /                                            controllers.Application.index()
+
+GET         /services/charting/last30days/:symbol        controllers.StockApi.last30Days(symbol: String)
+GET         /services/symbols/:query                     controllers.StockApi.symbols(query: String)
+POST        /services/vcard                              controllers.WikipediaApi.vcard()
+
+GET         /assets/*file                                controllers.Assets.at(path="/public", file)
+GET         /webjars/*file                               controllers.WebJarAssets.at(file)
+
+GET         /stockApiJavascriptRoutes                    controllers.StockApi.javascriptRoutes
+GET         /wikipediaApiJavascriptRoutes                controllers.WikipediaApi.javascriptRoutes
