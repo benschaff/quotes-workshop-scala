@@ -5,7 +5,7 @@ import play.api.mvc.{Action, Controller}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object Application extends Controller {
+trait Application { this: Controller =>
 
   def index() = Action.async {
     Future {
@@ -14,3 +14,5 @@ object Application extends Controller {
   }
 
 }
+
+object Application extends Application with Controller

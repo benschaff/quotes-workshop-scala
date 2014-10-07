@@ -1,27 +1,28 @@
 package controllers
 
-import models.StockApi.{ChartRequestElement, ChartRequest, StockSymbol}
+import models.StockApi.{ChartRequest, ChartRequestElement, StockSymbol}
 import play.api.Play.current
 import play.api.cache.Cache
-import play.api.libs.json.{JsValue, JsError, Json}
-import play.api.libs.ws.WS
+import play.api.libs.json.{JsError, JsValue, Json}
+import play.api.libs.ws.{WSRequestHolder, WS}
 import play.api.mvc.{Action, Controller}
-import play.api.{Routes, Logger, Play}
+import play.api.{Logger, Play, Routes}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-object StockApi extends Controller {
+import scala.concurrent.ExecutionContext.Implicits.global
 
-  private val logger = Logger(StockApi.getClass)
+trait StockApi { this: Controller =>
 
-  private val SymbolsApiUrl: String = Play.configuration.getString("markitondemand-api.lookup").get
+  protected val logger: Logger
 
-  private val ChartDataApiUrl: String = Play.configuration.getString("markitondemand-api.chartData").get
+  protected val SymbolsApiUrl: String
+
+  protected val ChartDataApiUrl: String
 
   def symbols(query: String) = Action.async {
-    WS.url(SymbolsApiUrl).withQueryString("input" -> query).get() map { response =>
+    callWS(SymbolsApiUrl).withQueryString("input" -> query).get map { response =>
       import models.StockApi.stockSymbolJsonFormat
 
       response.json.validate[Set[StockSymbol]] map { symbols =>
@@ -43,7 +44,7 @@ object StockApi extends Controller {
     else {
       import models.StockApi.chartRequestJsonFormat
 
-      WS.url(ChartDataApiUrl).withQueryString {
+      callWS(ChartDataApiUrl).withQueryString {
         "parameters" -> Json.stringify(Json.toJson(ChartRequest(elements = List(ChartRequestElement(symbol = symbol)))))
       }.get map {
         response =>
@@ -64,5 +65,19 @@ object StockApi extends Controller {
       }
     }
   }
+
+  protected def callWS(url: String): WSRequestHolder
+
+}
+
+object StockApi extends StockApi with Controller {
+
+  override protected val logger = Logger(classOf[StockApi])
+
+  override protected val SymbolsApiUrl = Play.configuration.getString("markitondemand-api.lookup").get
+
+  override protected val ChartDataApiUrl = Play.configuration.getString("markitondemand-api.chartData").get
+
+  override protected def callWS(url: String) = WS.url(url)
 
 }

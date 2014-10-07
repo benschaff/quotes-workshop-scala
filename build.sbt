@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "angularjs" % "1.2.25",
   "org.webjars" % "bootstrap" % "3.2.0",
   "org.webjars" % "angular-loading-bar" % "0.5.1",
-  "org.webjars" % "highcharts" % "4.0.3-1"
+  "org.webjars" % "highcharts" % "4.0.3-1",
+  "org.scalatestplus" %% "play" % "1.1.0" % "test"
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
